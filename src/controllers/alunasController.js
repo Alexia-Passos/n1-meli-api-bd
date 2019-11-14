@@ -100,34 +100,36 @@ exports.getAge = (req, res) => {
 
 
 exports.post = (req, res) => { 
-  const { nome, dateOfBirth, nasceuEmSp, id, livros } = req.body;
-  alunas.push({ nome, dateOfBirth, nasceuEmSp, id, livros });
+  let aluna = new Alunas(req.body);
+  aluna.save(function (err){
+    if (err) res.status(500).send(err);
 
-  fs.writeFile("./src/model/alunas.json", JSON.stringify(alunas), 'utf8', function (err) {
-    if (err) {
-      return res.status(500).send({ message: err });
-    }
-    console.log("The file was saved!");
-  }); 
+    return res.status(201).send(aluna);
 
-  return res.status(201).send(alunas);
+  })
+  // const { nome, dateOfBirth, nasceuEmSp, id, livros } = req.body;
+  // alunas.push({ nome, dateOfBirth, nasceuEmSp, id, livros });
+
+  // fs.writeFile("./src/model/alunas.json", JSON.stringify(alunas), 'utf8', function (err) {
+  //   if (err) {
+  //     return res.status(500).send({ message: err });
+  //   }
+  //   console.log("The file was saved!");
+  // });   
 }
 
 exports.postBooks = (req, res) => {
-  const id = req.params.id
-  const aluna = alunas.find(aluna => aluna.id == id)
-  if (!aluna) {
-    res.send("Nao encontrei essa garota")
+  const AlunasId = req.params.id
+  Alunas.findById(alunasId,function (err,aluna){
+    if (err) return res.status(500).send(err);
+    if(!aluna){
+      return res.status(200).send({message:`${alunasId} não encontrado`});
   }
-  const { titulo, leu } = req.body;
-  alunas[aluna.id - 1].livros.push({ titulo, leu });
-  
-  fs.writeFile("./src/model/alunas.json", JSON.stringify(alunas), 'utf8', function (err) {
-    if (err) {
-        return res.status(500).send({ message: err });
-    }
-    console.log("The file was saved!");
+  const livro = req.body;
+  (aluna.livros).push(livro);
+  aluna.save(function (err){
+    if(err)res.status(500).send(err);
+    res.status(201).send(aluna);
+  })
   });
-
-  res.status(201).send(alunas[aluna.id - 1].livros);
 }
