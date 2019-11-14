@@ -119,7 +119,7 @@ exports.post = (req, res) => {
 }
 
 exports.postBooks = (req, res) => {
-  const AlunasId = req.params.id
+  const alunasId = req.params.id
   Alunas.findById(alunasId,function (err,aluna){
     if (err) return res.status(500).send(err);
     if(!aluna){
