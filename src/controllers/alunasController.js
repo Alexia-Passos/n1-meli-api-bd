@@ -11,23 +11,36 @@ exports.get = (req, res) => {
 }
 
 exports.getById = (req, res) => {
-  const id = req.params.id
-  if (id > 34 || id <= 0) {
-    res.redirect(301, "https://en.wikipedia.org/wiki/Man-in-the-middle_attack")
+const alunasId = req.params.id
+//   if (id > 34 || id <= 0) {
+//     res.redirect(301, "https://en.wikipedia.org/wiki/Man-in-the-middle_attack")
+//   }
+//   res.status(200).send(alunas.find(aluna => aluna.id == id))
+// }
+
+Alunas.findById(alunasId, function (err,aluna){
+  if (err) return res.status(500).send(err);
+  if(!aluna){
+    return res.status(200).send({message:`Infelizmente não localizamos a aluna de id: ${alunasId}`});
   }
-  res.status(200).send(alunas.find(aluna => aluna.id == id))
+  res.status(200).send(aluna);
+})
 }
 
 exports.getBooks = (req, res) => {
-  const id = req.params.id
-  const aluna = alunas.find(aluna => aluna.id == id)
-  if (!aluna) {
-    res.send("Nao encontrei essa garota")
+
+  const alunasId = req.params.id
+
+  Alunas.findById(alunasId,function (err,aluna){
+  if (err) return res.status(500).send(err);
+  if(!aluna){
+    return res.status(200).send({message:`${alunasId} não encontrado`});
   }
   const livrosAluna = aluna.livros
-  const livrosLidos = livrosAluna.filter(livro => livro.leu == "true")
+  const livrosLidos = livrosAluna.filter(livro => livro.leu == true)
   const tituloLivros = livrosLidos.map(livro => livro.titulo)
   res.send(tituloLivros)
+})
 }
 
 // exports.getSp = (req, res) => {
@@ -51,8 +64,15 @@ exports.getSp = (req, res) => {
 }
 
 exports.getAge = (req, res) => {
+
   const id = req.params.id
-  const aluna = alunas.find(item => item.id == id)
+
+  Alunas.findById(id,function (err,aluna){
+    if (err) return res.status(500).send(err);
+    if(!aluna){
+      return res.status(200).send({message:`${id} não encontrado`});
+    }
+
   const dataNasc = aluna.dateOfBirth
   const arrData = dataNasc.split("/")
   const dia = arrData[0]
@@ -60,21 +80,24 @@ exports.getAge = (req, res) => {
   const ano = arrData[2]
   const idade = calcularIdade(ano, mes, dia)
   res.status(200).send({ idade })
-}
 
-function calcularIdade(anoDeNasc, mesDeNasc, diaDeNasc) {
-  const now = new Date()
-  const anoAtual = now.getFullYear()
-  const mesAtual = now.getMonth() + 1
-  const hoje = now.getDate()
-
-  let idade = anoAtual - anoDeNasc
-
-  if (mesAtual < mesDeNasc || (mesAtual == mesDeNasc && hoje < diaDeNasc)) {
-    idade -= 1
+  function calcularIdade(anoDeNasc, mesDeNasc, diaDeNasc) {
+    const now = new Date()
+    const anoAtual = now.getFullYear()
+    const mesAtual = now.getMonth() + 1
+    const hoje = now.getDate()
+  
+    let idade = anoAtual - anoDeNasc
+  
+    if (mesAtual < mesDeNasc || (mesAtual == mesDeNasc && hoje < diaDeNasc)) {
+      idade -= 1
+    }
+    return idade
   }
-  return idade
+  });
 }
+
+
 
 exports.post = (req, res) => { 
   const { nome, dateOfBirth, nasceuEmSp, id, livros } = req.body;
