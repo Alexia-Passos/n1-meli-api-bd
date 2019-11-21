@@ -133,3 +133,13 @@ exports.postBooks = (req, res) => {
   })
   });
 }
+
+exports.deletarAluna = (req,res) => {
+  const idAluna = req.params.id;
+  Alunas.findById(idAluna, function (err, aluna){
+    if(err) return res.status(500).send(err);
+    if (!aluna){
+      return res.status(200).send({message:`Infelizmente não localizou a aluna`})
+    }
+  })
+}
